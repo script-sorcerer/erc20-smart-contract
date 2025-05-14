@@ -3,9 +3,6 @@ pragma solidity ^0.8.26;
 
 import './IERC20.sol';
 
-error InsufficientApprovedAmount();
-error InsufficientActualAmount();
-
 contract ERC20 is IERC20 {
 	event Transfer(address indexed from, address indexed to, uint256 value);
 	event Approval(address indexed owner, address indexed spender, uint256 value);
@@ -41,12 +38,8 @@ contract ERC20 is IERC20 {
 		address recipient,
 		uint256 amount
 	) external returns (bool) {
-		if (allowance[sender][msg.sender] < amount) {
-			revert InsufficientApprovedAmount();
-		}
-		if (balanceOf[sender] < amount) {
-			revert InsufficientActualAmount();
-		}
+		require(allowance[sender][msg.sender] >= amount, 'Not enough allowance tokens');
+		require(balanceOf[sender] >= amount, 'Not enough balance tokens');
 
 		allowance[sender][msg.sender] -= amount;
 		balanceOf[sender] -= amount;

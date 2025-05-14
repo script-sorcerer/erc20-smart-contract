@@ -1,36 +1,41 @@
 {
-  "name": "erc20-smart-contract",
-  "version": "1.0.0",
-  "description": "The test task with erc20 smart contact interactions",
-  "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc --watch",
-    "dev": "ts-node src/server.ts",
-    "prepare": "husky"
-  },
-  "author": "sasha.los.0148@gmail.com",
-  "license": "ISC",
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "viem": "^2.29.2"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.26.0",
-    "@nomicfoundation/hardhat-ignition-viem": "^0.15.11",
-    "@nomicfoundation/hardhat-toolbox-viem": "^3.0.0",
-    "@types/cors": "^2.8.18",
-    "@types/express": "^5.0.1",
-    "@types/node": "^22.15.17",
-    "eslint": "^9.26.0",
-    "eslint-config-prettier": "^10.1.5",
-    "globals": "^16.1.0",
-    "hardhat": "^2.24.0",
-    "husky": "^9.1.7",
-    "prettier": "3.5.3",
-    "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0",
-    "typescript": "5.8.3",
-    "typescript-eslint": "^8.32.1"
-  }
+	"name": "erc20-smart-contract",
+	"version": "1.0.0",
+	"description": "The test task with erc20 smart contact interactions",
+	"scripts": {
+		"build": "tsc",
+		"build:watch": "tsc --watch",
+		"dev": "env-cmd -f .env ts-node src/server.ts",
+		"prepare": "husky"
+	},
+	"author": "sasha.los.0148@gmail.com",
+	"license": "ISC",
+	"dependencies": {
+		"cors": "^2.8.5",
+		"express": "^5.1.0",
+		"swagger-jsdoc": "^6.2.8",
+		"swagger-ui-express": "^5.0.1",
+		"viem": "^2.29.2"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.26.0",
+		"@nomicfoundation/hardhat-ignition-viem": "^0.15.11",
+		"@nomicfoundation/hardhat-toolbox-viem": "^3.0.0",
+		"@types/cors": "^2.8.18",
+		"@types/express": "^5.0.1",
+		"@types/node": "^22.15.17",
+		"@types/swagger-jsdoc": "^6.0.4",
+		"@types/swagger-ui-express": "^4.1.8",
+		"env-cmd": "^10.1.0",
+		"eslint": "^9.26.0",
+		"eslint-config-prettier": "^10.1.5",
+		"globals": "^16.1.0",
+		"hardhat": "^2.24.0",
+		"husky": "^9.1.7",
+		"prettier": "3.5.3",
+		"ts-node": "^10.9.2",
+		"tsconfig-paths": "^4.2.0",
+		"typescript": "5.8.3",
+		"typescript-eslint": "^8.32.1"
+	}
 }

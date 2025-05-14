@@ -1,189 +1,202 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <title>ERC20 Transfer</title>
-</head>
-<body>
-    <fieldset id="connect-wallet-fieldset">
-        <legend>Connect wallet</legend>
+	<head>
+		<title>ERC20 Transfer</title>
+	</head>
+	<body>
+		<fieldset id="connect-wallet-fieldset">
+			<legend>Connect wallet</legend>
 
-        <label for="private-key-input">Private Key</label>
-        <input id="private-key-input" type="text" placeholder="0x...">
+			<label for="private-key-input">Private Key</label>
+			<input id="private-key-input" type="text" placeholder="0x..." />
 
-        <button id="connect-btn">Connect</button>
-    </fieldset>
+			<button id="connect-btn">Connect</button>
+		</fieldset>
 
-    <fieldset id="mint-fieldset" style="display: none;">
-        <legend>Mint & Approve</legend>
+		<fieldset id="mint-fieldset" style="display: none">
+			<legend>Mint & Approve</legend>
 
-        <label for="mint-address-input">Your address</label>
-        <input id="mint-address-input" type="text" placeholder="0x...">
+			<label for="mint-address-input">Your address</label>
+			<input id="mint-address-input" type="text" placeholder="0x..." />
 
-        <label for="mint-amount-input">Amount (ETH)</label>
-        <input id="mint-amount-input" type="text" placeholder=""></label>
+			<label for="mint-amount-input">Amount (ETH)</label>
+			<input id="mint-amount-input" type="text" placeholder="" />
 
-        <button id="mint-btn">Obtain funds</button>
-    </fieldset>
+			<button id="mint-btn">Obtain funds</button>
+		</fieldset>
 
-    <fieldset id="send-fieldset" style="display: none;">
-        <legend>Send</legend>
+		<fieldset id="send-fieldset" style="display: none">
+			<legend>Send</legend>
 
-        <label for="recipient-address-input">Recipient</label>
-        <input id="recipient-address-input" type="text" placeholder="0x...">
+			<label for="recipient-address-input">Recipient</label>
+			<input id="recipient-address-input" type="text" placeholder="0x..." />
 
-        <label for="send-amount-input">Amount (ETH)</label>
-        <input id="send-amount-input" type="text" placeholder=""></label>
+			<label for="send-amount-input">Amount (ETH)</label>
+			<input id="send-amount-input" type="text" placeholder="" />
 
-        <button id="send-btn">Send</button>
-    </fieldset>
-</body>
-<script type="module">
-  import { createWalletClient, http, publicActions, parseEther, BaseError, ContractFunctionRevertedError } from 'https://esm.sh/viem'
-  import { hardhat } from 'https://esm.sh/viem/chains'
-  import { privateKeyToAccount } from 'https://esm.sh/viem/accounts'
+			<button id="send-btn">Send</button>
+		</fieldset>
+	</body>
+	<script type="module">
+		import {
+			createWalletClient,
+			http,
+			publicActions,
+			parseEther,
+			BaseError,
+			ContractFunctionRevertedError
+		} from 'https://esm.sh/viem';
+		import { hardhat } from 'https://esm.sh/viem/chains';
+		import { privateKeyToAccount } from 'https://esm.sh/viem/accounts';
 
-  const API_URL = 'http://localhost:3000/api' // Assume the API endpoint. In a real app, I believe that env would be used here.
+		const API_URL = 'http://localhost:3000/api'; // Assume the API endpoint. In a real app, I believe that env would be used here.
 
-  let contract 
-  let account;
-  let senderAddress;
+		let contract;
+		let account;
+		let senderAddress;
 
-  getContractInfo().then((contractInfo) => contract = contractInfo).catch(() => alert('Something went wrong'));
+		getContractInfo()
+			.then((contractInfo) => (contract = contractInfo))
+			.catch(() => alert('Something went wrong'));
 
-  document.getElementById('connect-btn').addEventListener('click', connectWallet);
-  document.getElementById('mint-btn').addEventListener('click', mint);
-  document.getElementById('send-btn').addEventListener('click', send);
+		document.getElementById('connect-btn').addEventListener('click', connectWallet);
+		document.getElementById('mint-btn').addEventListener('click', mint);
+		document.getElementById('send-btn').addEventListener('click', send);
 
-  async function getContractInfo() {
-    const response = await fetch(`${API_URL}/coin/contractInfo`, { method: 'GET' });
-    if (!response.ok) {
-        throw new Error('Something went wrong')
-    }
+		async function getContractInfo() {
+			const response = await fetch(`${API_URL}/coin/contractInfo`, { method: 'GET' });
+			if (!response.ok) {
+				throw new Error('Something went wrong');
+			}
 
-    const contractInfo = await response.json();
-    return contractInfo;
-  }
-  
-  async function connectWallet() {
-    const privateKey = document.getElementById('private-key-input').value;
-    if (!privateKey) {
-        alert('Please enter a private key');
-        return;
-    }
+			const { success, data: contractInfo, message } = await response.json();
+			if (!success) {
+				throw new Error(message);
+			}
 
-    account = privateKeyToAccount(privateKey);
+			return contractInfo;
+		}
 
-    document.getElementById('connect-wallet-fieldset').style.display = 'none';
-    document.getElementById('mint-fieldset').style.display = 'block';
-  }
+		async function connectWallet() {
+			const privateKey = document.getElementById('private-key-input').value;
+			if (!privateKey) {
+				alert('Please enter a private key');
+				return;
+			}
 
-  async function mint() {
-    if (!contract) {
-        alert('Contract is still loading. Try again later');
-        return;
-    }
-    if (!account) {
-        alert('Please connect your wallet');
-        return;
-    }
+			account = privateKeyToAccount(privateKey);
 
-    const address = document.getElementById('mint-address-input').value;
-    if (!address) {
-        alert('Please enter an address');
-        return;
-    }
-    const amount = parseEther(document.getElementById('mint-amount-input').value);
-    if (!amount || amount <= 0) {
-        alert('Please enter an amount');
-        return;
-    }
+			document.getElementById('connect-wallet-fieldset').style.display = 'none';
+			document.getElementById('mint-fieldset').style.display = 'block';
+		}
 
-    const client = createWalletClient({
-        account,
-        chain: hardhat,
-        transport: http(contract.chainHttpApiUrl)
-    }).extend(publicActions)
+		async function mint() {
+			if (!contract) {
+				alert('Contract is still loading. Try again later');
+				return;
+			}
+			if (!account) {
+				alert('Please connect your wallet');
+				return;
+			}
 
-    const { request: mintRequest } = await client.simulateContract({
-        address: contract.address,
-        abi: contract.abi,
-        functionName: 'mint',
-        args: [address, amount]
-    })
-    const mintHash = await client.writeContract(mintRequest)
-    
-    document.getElementById('send-fieldset').style.display = 'block';
+			const address = document.getElementById('mint-address-input').value;
+			if (!address) {
+				alert('Please enter an address');
+				return;
+			}
+			const amount = parseEther(document.getElementById('mint-amount-input').value);
+			if (!amount || amount <= 0) {
+				alert('Please enter an amount');
+				return;
+			}
 
-    alert(`Mint hash: ${mintHash}`)
+			const client = createWalletClient({
+				account,
+				chain: hardhat,
+				transport: http(contract.chainHttpApiUrl)
+			}).extend(publicActions);
 
-    const { request: approveRequest } = await client.simulateContract({
-        address: contract.address,
-        abi: contract.abi,
-        functionName: 'approve',
-        args: [address, amount]
-    })
-    const approveHash = await client.writeContract(mintRequest)
+			const { request: mintRequest } = await client.simulateContract({
+				address: contract.address,
+				abi: contract.abi,
+				functionName: 'mint',
+				args: [address, amount]
+			});
+			const mintHash = await client.writeContract(mintRequest);
 
-    senderAddress = address;
+			document.getElementById('send-fieldset').style.display = 'block';
 
-    alert(`Approve hash: ${approveHash}`)
-  }
+			alert(`Mint hash: ${mintHash}`);
 
-  async function send() {
-    if (!contract) {
-        alert('Contract is still loading. Try again later');
-        return;
-    }
-    if (!account) {
-        alert('Please connect your wallet');
-        return;
-    }
-    if (!senderAddress) {
-        alert('Please approve first');
-        return;
-    }
+			const { request: approveRequest } = await client.simulateContract({
+				address: contract.address,
+				abi: contract.abi,
+				functionName: 'approve',
+				args: [address, amount]
+			});
+			const approveHash = await client.writeContract(approveRequest);
 
-    const address = document.getElementById('recipient-address-input').value;
-    if (!address) {
-        alert('Please enter an address');
-        return;
-    }
-    const amount = parseEther(document.getElementById('send-amount-input').value);
-    if (!amount || amount <= 0) {
-        alert('Please enter an amount');
-        return;
-    }
-    const client = createWalletClient({
-        account,
-        chain: hardhat,
-        transport: http(contract.chainHttpApiUrl)
-    }).extend(publicActions)
+			senderAddress = address;
 
-    let request
-    try {
-        const result = await client.simulateContract({
-            address: contract.address,
-            abi: contract.abi,
-            functionName: 'transferFrom',
-            args: [senderAddress, address, amount]
-        })
+			alert(`Approve hash: ${approveHash}`);
+		}
 
-        request = result.request
-    } catch (error) {
-        if (error instanceof BaseError) {
-            const revertError = error.walk(error => error instanceof ContractFunctionRevertedError)
-            if (revertError instanceof ContractFunctionRevertedError) {
-                const errorName = revertError.data?.errorName ?? ''
+		async function send() {
+			if (!contract) {
+				alert('Contract is still loading. Try again later');
+				return;
+			}
+			if (!account) {
+				alert('Please connect your wallet');
+				return;
+			}
+			if (!senderAddress) {
+				alert('Please approve first');
+				return;
+			}
 
-                alert(`Unable to perform the action. Error: ${errorName}`)
-            }
-        }
+			const address = document.getElementById('recipient-address-input').value;
+			if (!address) {
+				alert('Please enter an address');
+				return;
+			}
+			const amount = parseEther(document.getElementById('send-amount-input').value);
+			if (!amount || amount <= 0) {
+				alert('Please enter an amount');
+				return;
+			}
+			const client = createWalletClient({
+				account,
+				chain: hardhat,
+				transport: http(contract.chainHttpApiUrl)
+			}).extend(publicActions);
 
-        return
-    }
-    
-    const hash = await client.writeContract(request)
-    alert(`Transaction hash: ${hash}`)
-  }
-</script>
+			let request;
+			try {
+				const result = await client.simulateContract({
+					address: contract.address,
+					abi: contract.abi,
+					functionName: 'transferFrom',
+					args: [senderAddress, address, amount]
+				});
+
+				request = result.request;
+			} catch (error) {
+				if (error instanceof BaseError) {
+					const revertError = error.walk((error) => error instanceof ContractFunctionRevertedError);
+					if (revertError instanceof ContractFunctionRevertedError) {
+						const errorName = revertError.data?.errorName ?? '';
+
+						alert(`Unable to perform the action. Error: ${errorName}`);
+					}
+				}
+
+				return;
+			}
+
+			const hash = await client.writeContract(request);
+			alert(`Transaction hash: ${hash}`);
+		}
+	</script>
 </html>
